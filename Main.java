@@ -20,7 +20,7 @@ public class Main {
             AIPlayer.registerAllAIPlayers();
 
             // Create game logic
-            PlayableLogic gameLogic = new GameLogic();
+            PlayableLogic gameLogic = new GameLogic(board);
 
             // Create and show the game GUI
             GUI_for_chess_like_games gui = new GUI_for_chess_like_games(gameLogic, "Reversi Game");

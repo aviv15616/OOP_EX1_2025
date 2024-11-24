@@ -68,7 +68,7 @@ public class GameLogic implements PlayableLogic {
             p1.wins++;
         } else if (player2Score > player1Score) {
             showWinner(p2, player2Score, p1, player1Score);
-            p2.wins++:
+            p2.wins++;
         } else {
             System.out.println("It's a tie! Both players have " + player1Score + " discs.");
         }

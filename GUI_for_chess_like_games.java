@@ -40,7 +40,7 @@ public class GUI_for_chess_like_games extends JFrame {
         if (!currentPlayer.isHuman()) {
 
             Move aiMove = ((AIPlayer) currentPlayer).makeMove(gameLogic);
-            preform_move(aiMove.position(), aiMove.disc());
+            preform_move(aiMove.getPosition(), aiMove.getDisc());
 
             // Update the current player after the move
             currentPlayer = gameLogic.isFirstPlayerTurn() ? gameLogic.getFirstPlayer() : gameLogic.getSecondPlayer();
@@ -312,7 +312,7 @@ public class GUI_for_chess_like_games extends JFrame {
     private void enhanceColor() {
         List<Position> possiblePositions = this.gameLogic.ValidMoves();
         for (Position p : possiblePositions) {
-            JButton button = buttons[p.row()][p.col()];
+            JButton button = buttons[p.getRow()][p.getCol()];
             Color currentColor = button.getBackground();
 
             // Determine if the current color is closer to white or black

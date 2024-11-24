@@ -1,13 +1,13 @@
 public class BombDisc implements Disc{
     private Player p1;
-    private String type="Bomb"
-    private Position currPos;
+    private String type="Bomb";
+
+    public BombDisc(Player p1){
+        this.p1=p1;
+    }
     @Override
     public Player getOwner() {
         return p1;
-    }
-    public Position getPos(){
-        return currPos;
     }
 
     @Override

@@ -1,13 +1,13 @@
 public class UnflippableDisc implements Disc {
     private Player p1;
-    private Position currPos;
     private final String type="Unflip";
+    public UnflippableDisc(Player p1){
+        this.p1=p1;
+
+    }
     @Override
     public Player getOwner() {
         return p1;
-    }
-    public Position getPos(){
-        return currPos;
     }
     @Override
     public void setOwner(Player player) {

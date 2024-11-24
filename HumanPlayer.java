@@ -1,6 +1,10 @@
 public class HumanPlayer  extends Player{
     @Override
     boolean isHuman() {
-        return false;
+        return true;
     }
+    public HumanPlayer(boolean isPlayerOne) {
+        super(isPlayerOne);
+    }
+
 }

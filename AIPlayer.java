@@ -6,8 +6,7 @@ import java.util.*;
  */
 public abstract class AIPlayer extends Player {
     public static void registerAllAIPlayers() {
-        registerAIPlayerType("RandomAI", RandomAI.class);
-        registerAIPlayerType("GreedyAI", GreedyAI.class);
+
         // Add more AIPlayer subclasses here as needed
     }
     @Override

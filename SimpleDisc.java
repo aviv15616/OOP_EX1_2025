@@ -2,7 +2,7 @@ public class SimpleDisc implements Disc
 {
 
     private Player p1;
-    private final String type="Simple";
+    private final String type="⬤";
 
     public SimpleDisc(Player p1){
         this.p1=p1;

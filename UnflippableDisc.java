@@ -1,6 +1,6 @@
 public class UnflippableDisc implements Disc {
     private Player p1;
-    private final String type="Unflip";
+    private final String type="⭕";
     public UnflippableDisc(Player p1){
         this.p1=p1;
 

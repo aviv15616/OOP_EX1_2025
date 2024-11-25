@@ -1,6 +1,6 @@
 public class BombDisc implements Disc{
     private Player p1;
-    private String type="Bomb";
+    private String type="⭕";
 
     public BombDisc(Player p1){
         this.p1=p1;

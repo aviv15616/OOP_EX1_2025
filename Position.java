@@ -1,14 +1,10 @@
 public class Position {
     private int row;  // The row index (0-7 for an 8x8 board)
     private int col;  // The column index (0-7 for an 8x8 board)
-    private Disc d1;
 
     public Position(int row, int col) {
         this.row = row;
         this.col = col;
-    }
-    public Disc getDisc(){
-        return d1;
     }
     public int getRow() {
         return row;
@@ -24,6 +20,10 @@ public class Position {
         if (obj == null || getClass() != obj.getClass()) return false;
         Position position = (Position) obj;
         return row == position.row && col == position.col;
+    }
+    public String toString(){
+
+        return row+","+col;
     }
 
 

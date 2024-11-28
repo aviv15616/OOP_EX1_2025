@@ -5,6 +5,6 @@ public class SimpleDisc extends Disc {
 
     @Override
     public String getType() {
-        return "Simple";
+        return "⬤";
     }
 }

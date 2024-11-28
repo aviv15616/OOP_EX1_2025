@@ -27,12 +27,12 @@ public abstract class Disc {
     public void setOwner(Player player) {
         this.owner = player;
     }
-
     /**
-     * Get the type of the disc as a symbol.
-     * Each subclass will provide its unique symbol.
-     *
-     * @return the symbol representing the type of the disc.
+     * Get the type of the disc.
+     * use the:
+     *          "⬤",         "⭕"                "💣"
+     *      Simple Disc | Unflippedable Disc | Bomb Disc |
+     * respectively.
      */
     public abstract String getType();
 

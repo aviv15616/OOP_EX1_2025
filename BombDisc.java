@@ -5,6 +5,6 @@ public class BombDisc extends Disc {
 
     @Override
     public String getType() {
-        return "Bomb";
+        return "💣";
     }
 }

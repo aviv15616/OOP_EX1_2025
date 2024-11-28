@@ -5,6 +5,6 @@ public class UnflippableDisc extends Disc {
 
     @Override
     public String getType() {
-        return "Unflip";
+        return "⭕";
     }
 }

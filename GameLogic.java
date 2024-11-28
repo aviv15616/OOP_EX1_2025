@@ -9,6 +9,32 @@ public class GameLogic implements PlayableLogic {
     private boolean gameFinished = false; // Track if the game is finished
     private Stack<Move> moveHistory; // For undo functionality
 
+    public GameLogic cloneGame() {
+        GameLogic clonedGame = new GameLogic();
+
+        // Clone the board (assuming board elements are not null)
+        clonedGame.board = new Disc[boardSize][boardSize];
+        for (int i = 0; i < boardSize; i++) {
+            System.arraycopy(this.board[i], 0, clonedGame.board[i], 0, boardSize);
+        }
+
+        // Clone the players
+        clonedGame.p1 = new MiniMaxAI(true); // Assuming Player has a constructor for copy
+        clonedGame.p2 = new RandomAI(false);
+
+        // Set the current turn based on the original game's state
+        clonedGame.currentTurn = (this.currentTurn == this.p1) ? clonedGame.p1 : clonedGame.p2;
+
+        // Clone the move history (using new stack)
+        clonedGame.moveHistory = new Stack<>();
+        clonedGame.moveHistory.addAll(this.moveHistory);
+
+        // Clone other relevant state
+        clonedGame.gameFinished = this.gameFinished;
+
+        return clonedGame;
+    }
+
     public GameLogic() {
         board = new Disc[boardSize][boardSize];
         moveHistory = new Stack<>();
@@ -17,6 +43,7 @@ public class GameLogic implements PlayableLogic {
 
         reset();
     }
+
 
 
     public boolean isValidBoard() {
@@ -77,9 +104,11 @@ public class GameLogic implements PlayableLogic {
         int score = 0;
         for (Disc[] d1 : board) {
             for (Disc d2 : d1) {
+                if (d2 != null) {
 
                     if (p1.equals(d2.getOwner())) score++;
 
+                }
             }
         }
         return score;

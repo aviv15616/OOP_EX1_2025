@@ -1,22 +1,10 @@
-public class BombDisc implements Disc{
-    private Player p1;
-    private String type="⭕";
-
-    public BombDisc(Player p1){
-        this.p1=p1;
-    }
-    @Override
-    public Player getOwner() {
-        return p1;
-    }
-
-    @Override
-    public void setOwner(Player player) {
-        p1= player;
+public class BombDisc extends Disc {
+    public BombDisc(Player owner) {
+        super(owner);
     }
 
     @Override
     public String getType() {
-        return type;
+        return "Bomb";
     }
 }

@@ -1,3 +1,5 @@
+import java.util.Objects;
+
 public class Position {
     private int row;  // The row index (0-7 for an 8x8 board)
     private int col;  // The column index (0-7 for an 8x8 board)
@@ -21,10 +23,15 @@ public class Position {
         Position position = (Position) obj;
         return row == position.row && col == position.col;
     }
+    @Override
+    public int hashCode() {
+        return Objects.hash(col,row); // Modify based on your fields
+    }
     public String toString(){
 
         return row+","+col;
     }
+
 
 
 }

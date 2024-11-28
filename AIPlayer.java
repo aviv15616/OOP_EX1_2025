@@ -7,7 +7,11 @@ import java.util.*;
 public abstract class AIPlayer extends Player {
     public static void registerAllAIPlayers() {
 
-        // Add more AIPlayer subclasses here as needed
+        registerAIPlayerType("RandomAI",RandomAI.class);
+        registerAIPlayerType("GreedyAI",GreedyAI.class);
+
+
+
     }
     @Override
     public boolean isHuman() {

@@ -1,29 +1,48 @@
-/**
- * The Disc interface defines the characteristics of a game in a chess-like game.
- * Implementing classes should provide information about the player who owns the Disc.
- */
-public interface Disc {
+public abstract class Disc {
+    protected Player owner;
+
+    /**
+     * Constructor to initialize a Disc with a given owner.
+     *
+     * @param owner the player who owns this disc.
+     */
+    public Disc(Player owner) {
+        this.owner = owner;
+    }
 
     /**
      * Get the player who owns the Disc.
      *
      * @return The player who is the owner of this game disc.
      */
-    Player getOwner();
+    public Player getOwner() {
+        return owner;
+    }
 
     /**
      * Set the player who owns the Disc.
      *
+     * @param player the new owner of this disc.
      */
-    void setOwner(Player player);
+    public void setOwner(Player player) {
+        this.owner = player;
+    }
 
     /**
-     * Get the type of the disc.
-     * use the:
-     *          "⬤",         "⭕"                "💣"
-     *      Simple Disc | Unflippedable Disc | Bomb Disc |
-     * respectively.
+     * Get the type of the disc as a symbol.
+     * Each subclass will provide its unique symbol.
+     *
+     * @return the symbol representing the type of the disc.
      */
-    String getType();
+    public abstract String getType();
 
+    /**
+     * Returns a string representation of the disc, indicating the owner.
+     *
+     * @return a string with the symbol of the disc and the owner's info.
+     */
+    @Override
+    public String toString() {
+        return getType() + " owned by " + (owner != null ? owner : "none");
+    }
 }

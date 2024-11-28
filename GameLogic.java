@@ -18,6 +18,7 @@ public class GameLogic implements PlayableLogic {
         reset();
     }
 
+
     public boolean isValidBoard() {
         if (board == null || boardSize == 0) return false;
         return true;
@@ -62,6 +63,8 @@ public class GameLogic implements PlayableLogic {
                 System.out.println("It's a tie! Both players have " + player1Score + " discs.");
             }
         }
+
+
     }
 
     public void showWinner(Player winner, int winScore, Player loser, int loseScore) {
@@ -74,21 +77,25 @@ public class GameLogic implements PlayableLogic {
         int score = 0;
         for (Disc[] d1 : board) {
             for (Disc d2 : d1) {
-                if (p1.equals(d2.getOwner())) score++;
+
+                    if (p1.equals(d2.getOwner())) score++;
+
             }
         }
         return score;
     }
 
+
     public void flipDiscs(Move m1) {
         List<Position> toBeFlip = m1.getFlippedDiscs();
+
         for (Position pos : toBeFlip) {
-            int row = pos.getRow();
-            int col = pos.getCol();
-            Disc currD = board[row][col];
-            if (currD != null) {
+
+
                 flipDisc(pos);
-            }
+            System.out.println("flipping pos:("+pos.getRow()+","+pos.getCol());
+
+
         }
     }
 
@@ -112,14 +119,14 @@ public class GameLogic implements PlayableLogic {
     public int getBoardSize() {
         return boardSize;
     }
+    public Disc [][] getBoard(){
+        return this.board;
+    }
 
     private boolean isValidPosition(int row, int col) {
         return row >= 0 && row < boardSize && col >= 0 && col < boardSize;
     }
 
-    public boolean isValidMove(Move m1) {
-        return countFlips(m1.getPosition()) > 0;
-    }
 
     public boolean isValidMove(Position a) {
         return isValidPosition(a.getRow(), a.getCol()) && board[a.getRow()][a.getCol()] == null && countFlips(a) > 0;
@@ -142,75 +149,92 @@ public class GameLogic implements PlayableLogic {
         return getFlips(a).size();
     }
 
-    public Set<Position> getFlips(Position a) {
-        Set<Position> flips = new HashSet<>();
-        Set<Position> flippedBombs = new HashSet<>();
+
+    public Set<Position> getFlips(Position position) {
+        // Create a set to store the positions that should be flipped
+       Set <Position> flips =new HashSet<>();
+
+        // Loop through all 8 directions
         for (int dx = -1; dx <= 1; dx++) {
             for (int dy = -1; dy <= 1; dy++) {
                 if (dx == 0 && dy == 0) continue;
-                flips.addAll(getFlipsInDir(a, dx, dy, flippedBombs));
-
-
-                // Ensure only valid flips are added
-
+                // Add flips from each direction to the set
+                flips.addAll(getFlipsInDir(position, dx, dy));
             }
         }
-        flips.removeIf(bombPosition -> {
-            // Get the disc at bombPosition and check if its owner is the current player
-            Disc bombDisc = board[bombPosition.getRow()][bombPosition.getCol()];  // Fetch the disc at bombPosition
-            return bombDisc != null && bombDisc.getOwner().equals(currentTurn);  // Remove bombPosition if its owner matches currentTurn
+
+
+
+        flips.removeIf(currD2 -> {
+            if (currD2 != null) {
+                Disc discAtPos = board[currD2.getRow()][currD2.getCol()];
+                return discAtPos != null && discAtPos.getOwner().equals(currentTurn);
+            }
+            return false;
         });
-        return flips;
+        removeDuplicates(flips);
+       return flips;
+    }
+    // The isPosSame method is already defined as:
+
+    public boolean isPosSame(Position a, Position b){
+        return a.getRow()==b.getRow()&&a.getCol()==b.getCol();
+    }
+    public void removeDuplicates(Set<Position> positions) {
+        Set<Position> uniquePositions = new HashSet<>(positions);
+        positions.clear();  // Clear the original list
+        positions.addAll(uniquePositions);  // Add the unique positions back
     }
 
-    public Set<Position> getFlipsInDir(Position start, int dx, int dy, Set<Position> flippedBombs) {
+    public Set<Position> getFlipsInDir(Position start, int dx, int dy) {
+        Set<Position> processedBombs=new HashSet<>();
         Set<Position> flips = new HashSet<>();
-        Set<Position> potentialFlips = new HashSet<>();
+        Set<Position> potentialFlips = new HashSet<>(); // Tracks the opponent's discs in the direction
 
         int x = start.getRow() + dx;
         int y = start.getCol() + dy;
 
+        // Loop until we either go out of bounds (end of board) or encounter an empty space
         while (isValidPosition(x, y)) {
-            Disc currD = board[x][y];
-            Position currP = new Position(x, y);
+            Disc currD = board[x][y]; // Get the disc at the current position
+            Position currP = new Position(x, y); // Current position
 
             if (currD == null) {
-                // Stop on empty space
-                break;
-            }
-            else if (currD instanceof BombDisc) {
-                if (!flippedBombs.contains(currP)) {
-                    if (!isOwnDisc(currD)) {
-                        // Trigger opponent bomb and collect flips
-                        Set<Position> bombFlips = triggerBomb(currP, flippedBombs);
-                        potentialFlips.add(currP);  // Include the bomb itself
-                        potentialFlips.addAll(bombFlips);  // Include triggered flips
-                    } else {
-                        // Include player-owned bomb but stop the sequence
-                        potentialFlips.add(currP);
-                        flips.addAll(potentialFlips);
-                        break;
-                    }
-                } else {
-                    // Skip already processed bombs
-                    break;
-                }
-            }
-            else if (!isOwnDisc(currD) && !(currD instanceof UnflippableDisc)) {
-                // Add opponent's flippable disc
-                potentialFlips.add(currP);
-            }
-            else if (isOwnDisc(currD)) {
-                // Chain is enclosed; add potential flips
-                flips.addAll(potentialFlips);
-                break;
-            }
-            else {
-                // Invalid chain; stop
-                break;
+                break; // We stop the sequence when encountering an empty space
             }
 
-            // Move in the direction (dx, dy)
+            if (!isOwnDisc(currD) && !(currD instanceof UnflippableDisc)) {
+                // Add opponent's discs to potential flips
+                potentialFlips.add(currP);
+
+
+            } else if (isOwnDisc(currD)) {
+                // When we encounter our own disc
+                if (!potentialFlips.isEmpty()) {
+                    // Commit the opponent discs (if any) to flips
+                    flips.addAll(potentialFlips);
+
+                    // Set to track bombs that we need to process
+                    for(Position pos:potentialFlips){
+                        Disc disc=board[pos.getRow()][pos.getCol()];
+                        if(disc instanceof BombDisc) {
+                            flips.remove(pos);
+                            triggerBomb(pos, flips, processedBombs);
+                        }
+                    }
+
+                    // Process any bombs in the flips set after collecting all positions
+
+                    // Remove flips that are not actually owned by the current player
+
+
+                    // Print the positions being committed
+                }
+
+                break; // Stop processing when our own disc is encountered
+            }
+
+            // Move to the next position in the given direction
             x += dx;
             y += dy;
         }
@@ -218,16 +242,32 @@ public class GameLogic implements PlayableLogic {
         return flips;
     }
 
-    private Set<Position> triggerBomb(Position bomb, Set<Position> flippedBombs) {
-        Set<Position> flips = new HashSet<>();
-        if (flippedBombs.contains(bomb)) return new HashSet<>();
 
-        Disc bombD = board[bomb.getRow()][bomb.getCol()];
+    private void triggerBomb(Position bomb, Set<Position> flips, Set<Position> processedBombs) {
+        // Debug prints to track the current state of the sets
+        System.out.println("Current flips set: " + flips);
+        System.out.println("Current processedBombs set: " + processedBombs);
 
+        // If this bomb has already been processed or flipped, return immediately
+        if (processedBombs.contains(bomb) || flips.contains(bomb)) {
+            System.out.println("Bomb at (" + bomb.getRow() + ", " + bomb.getCol() + ") already processed or flipped.");
+            return; // Stop recursion if this bomb has already been triggered
+        }
 
+        // Add bomb to the flips set and processed bombs set
+
+        processedBombs.add(bomb);  // Mark as processed
+flips.add(bomb);
+        System.out.println("Current flips set after: " + flips);
+        System.out.println("Current processedBombs set after: " + processedBombs);
+        // Debug print to confirm bomb is being added to the flips and processed sets
+        System.out.println("Bomb at (" + bomb.getRow() + ", " + bomb.getCol() + ") added to flips and processed.");
+
+        // For each neighboring position of the bomb, check if it should trigger another bomb or flip discs.
         for (int dx = -1; dx <= 1; dx++) {
             for (int dy = -1; dy <= 1; dy++) {
-                if (dx == 0 && dy == 0) continue; // Skip the bomb's position
+                if (dx == 0 && dy == 0) continue;  // Skip the bomb's own position.
+
                 int x = bomb.getRow() + dx;
                 int y = bomb.getCol() + dy;
 
@@ -235,33 +275,49 @@ public class GameLogic implements PlayableLogic {
                     Position adj = new Position(x, y);
                     Disc adjDisc = board[x][y];
 
-                    if (adjDisc != null ) {
-                        flips.add(adj); // Add adjacent disc
+                    if (adjDisc != null && !(adjDisc instanceof UnflippableDisc)) {
+                        // Debug print to track the adjacent position and its disc type
+                        System.out.println("Checking adjacent position: (" + x + ", " + y + "), Disc: " + adjDisc.getClass().getSimpleName());
 
-                        if (adjDisc instanceof BombDisc && !isOwnDisc(adjDisc) && adjDisc.getOwner().equals(bombD.getOwner())) {
-                            flippedBombs.add(adj);
 
-                            // Trigger adjacent bomb if conditions are met
-                            flips.addAll(triggerBomb(adj, flippedBombs));
-
-                        };
+                            // Case 1: If adjDisc is NOT your disc AND it is a BombDisc
+                            if (!isOwnDisc(adjDisc) && adjDisc instanceof BombDisc && !processedBombs.contains(adj)) {
+                                System.out.println("Adjacent bomb found at (" + x + ", " + y + "). Triggering...");
+                                triggerBomb(adj, flips, processedBombs);  // Recursively trigger the adjacent bomb
+                            }
+                            // Case 2: If adjDisc IS your disc AND it is a BombDisc
+                            else if (isOwnDisc(adjDisc) && adjDisc instanceof BombDisc) {
+                                System.out.println("This is your BombDisc at (" + x + ", " + y + "). No action taken.");
+                            }
+                            // Case 3: If adjDisc is NOT your disc AND it is NOT a BombDisc
+                            else if (!isOwnDisc(adjDisc) && !(adjDisc instanceof BombDisc)) {
+                                flips.add(adj);  // Add to flips list if it's a valid disc
+                            }
+                            // Case 4: If adjDisc IS your disc AND it is NOT a BombDisc
+                            else if (isOwnDisc(adjDisc) && !(adjDisc instanceof BombDisc)) {
+                                System.out.println("This is your regular disc at (" + x + ", " + y + "). No action taken.");
+                            }
+                        }
                     }
-                }
+
             }
         }
-
-        return flips;
     }
+
+
+
+
+
+
+
 
     private void flipDisc(Position a) {
-        board[a.getRow()][a.getCol()].setOwner(
-                board[a.getRow()][a.getCol()].getOwner().equals(p1) ? p2 : p1
-        );
-    }
-
-
-    private boolean isEmpty(int x, int y) {
-        return board[x][y] == null;
+        Disc d1 = board[a.getRow()][a.getCol()];
+        if (d1.getOwner().equals(p1)) {
+            d1.setOwner(p2);
+        } else {
+            d1.setOwner(p1);
+        }
     }
 
     private boolean isOwnDisc(Disc disc) {
@@ -302,8 +358,8 @@ public class GameLogic implements PlayableLogic {
         moveHistory.clear();
         p1.number_of_unflippedable = 2;
         p2.number_of_unflippedable = 2;
-        p1.number_of_bombs = 2;
-        p2.number_of_bombs = 2;
+        p1.number_of_bombs = 3;
+        p2.number_of_bombs = 3;
 
         // Initialize the board with starting discs
         board[3][3] = new SimpleDisc(p1);
@@ -323,13 +379,15 @@ public class GameLogic implements PlayableLogic {
             Move lastMove = moveHistory.pop();
 
             Position p4 = lastMove.getPosition();
-            board[p4.getRow()][p4.getCol()] = null;
+            currentTurn = currentTurn.equals(p1) ? p2 : p1;
             if(lastMove.getDisc() instanceof BombDisc)currentTurn.number_of_bombs++;
-            else if(lastMove.getDisc() instanceof UnflippableDisc)currentTurn.number_of_unflippedable++;
+            if(lastMove.getDisc() instanceof UnflippableDisc)currentTurn.number_of_unflippedable++;
+            board[p4.getRow()][p4.getCol()] = null;
+
 
             flipDiscs(lastMove);
 
-            currentTurn = currentTurn.equals(p1) ? p2 : p1;
+
 
         }
 

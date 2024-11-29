@@ -353,7 +353,7 @@ public class GUI_for_chess_like_games extends JFrame {
             for (int col = 0; col < BOARD_SIZE; col++) {
                 buttons[row][col] = new JButton();
                 buttons[row][col].setPreferredSize(new Dimension(BUTTON_SIZE, BUTTON_SIZE)); // Adjust size as needed
-                Font chessFont = new Font("Arial Unicode MS", Font.PLAIN, FONT_SIZE);
+                Font chessFont = new Font("DejaVu Sans", Font.PLAIN, FONT_SIZE);
                 buttons[row][col].setFont(chessFont);
 
                 // Set alternating background colors for a chessboard pattern
@@ -415,5 +415,3 @@ public class GUI_for_chess_like_games extends JFrame {
         turnLabel.setText("Player 1's Turn");
     }
 }
-
-

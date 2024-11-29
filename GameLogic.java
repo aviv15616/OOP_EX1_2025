@@ -3,12 +3,19 @@ import java.util.*;
 public class GameLogic implements PlayableLogic {
     private Disc[][] board;
     private final int boardSize = 8;
-    private int MAX = Integer.MAX_VALUE;
     private Player p1, p2;
     private Player currentTurn; // Track whose turn it is
     private boolean gameFinished = false; // Track if the game is finished
     private Stack<Move> moveHistory; // For undo functionality
 
+    public GameLogic() {
+        board = new Disc[boardSize][boardSize];
+        moveHistory = new Stack<>();
+        this.p1 = new HumanPlayer(true);
+        this.p2 = new HumanPlayer(false);
+
+        reset();
+    }
     public GameLogic cloneGame() {
         GameLogic clonedGame = new GameLogic();
 
@@ -23,7 +30,7 @@ public class GameLogic implements PlayableLogic {
         clonedGame.p2 = new RandomAI(false);
 
         // Set the current turn based on the original game's state
-        clonedGame.currentTurn = (this.currentTurn == this.p1) ? clonedGame.p1 : clonedGame.p2;
+        clonedGame.currentTurn = (this.isFirstPlayerTurn()) ? clonedGame.p1 : clonedGame.p2;
 
         // Clone the move history (using new stack)
         clonedGame.moveHistory = new Stack<>();
@@ -34,16 +41,6 @@ public class GameLogic implements PlayableLogic {
 
         return clonedGame;
     }
-
-    public GameLogic() {
-        board = new Disc[boardSize][boardSize];
-        moveHistory = new Stack<>();
-        this.p1 = new HumanPlayer(true);
-        this.p2 = new HumanPlayer(false);
-
-        reset();
-    }
-
 
     public boolean isValidBoard() {
         if (board == null || boardSize == 0) return false;
@@ -81,7 +78,7 @@ public class GameLogic implements PlayableLogic {
         for (Position pos : flipped) {
             String type = board[pos.row()][pos.col()].getType();
             System.out.println(
-                    currentTurn == p1 ?
+                    isFirstPlayerTurn() ?
                             "Player 1 flipped the " + type + " in (" + pos.row() + "," + pos.col() + ")" :
                             "Player 2 flipped the " + type + " in (" + pos.row() + "," + pos.col() + ")"
             );
@@ -104,17 +101,16 @@ public class GameLogic implements PlayableLogic {
         );
     }
 
-
     public void updateGame() {
         if (ValidMoves().isEmpty()) {
             this.gameFinished = true;
             int player1Score = countPlayerDiscs(p1);
             int player2Score = countPlayerDiscs(p2);
             if (player1Score > player2Score) {
-                showWinner(p1, player1Score, p2, player2Score);
+                printWinner(p1, player1Score, p2, player2Score);
                 p1.wins++;
             } else if (player2Score > player1Score) {
-                showWinner(p2, player2Score, p1, player1Score);
+                printWinner(p2, player2Score, p1, player1Score);
                 p2.wins++;
             } else {
                 System.out.println("It's a tie! Both players have " + player1Score + " discs.");
@@ -124,7 +120,7 @@ public class GameLogic implements PlayableLogic {
 
     }
 
-    public void showWinner(Player winner, int winScore, Player loser, int loseScore) {
+    public void printWinner(Player winner, int winScore, Player loser, int loseScore) {
         System.out.println("Player " + (winner.isPlayerOne() ? "1" : "2") +
                 " wins with " + winScore + " discs! Player " +
                 (loser.isPlayerOne() ? "1" : "2") + " had " + loseScore + " discs.");
@@ -157,14 +153,6 @@ public class GameLogic implements PlayableLogic {
         }
     }
 
-    private void printFlipDisc(String type, Position a) {
-        System.out.println(
-                currentTurn == p1 ?
-                        "Player 1 flipped the " + type + " in (" + a.row() + "," + a.col() + ")" :
-                        "Player 2 flipped the " + type + " in (" + a.row() + "," + a.col() + ")"
-        );
-    }
-
     public boolean isBomb0() {
         return currentTurn.number_of_bombs == 0;
     }
@@ -186,14 +174,9 @@ public class GameLogic implements PlayableLogic {
         return boardSize;
     }
 
-    public Disc[][] getBoard() {
-        return this.board;
-    }
-
     private boolean isValidPosition(int row, int col) {
         return row >= 0 && row < boardSize && col >= 0 && col < boardSize;
     }
-
 
     public boolean isValidMove(Position a) {
         return isValidPosition(a.row(), a.col()) && board[a.row()][a.col()] == null && countFlips(a) > 0;
@@ -216,7 +199,6 @@ public class GameLogic implements PlayableLogic {
         return getFlips(a).size();
     }
 
-
     public Set<Position> getFlips(Position position) {
         // Create a set to store the positions that should be flipped
         Set<Position> flips = new HashSet<>();
@@ -231,7 +213,7 @@ public class GameLogic implements PlayableLogic {
         }
 
 
-        flips.removeIf(currD2 -> {
+        flips.removeIf(currD2 -> { //Extra check to make sure the current player isn't flipping his discs back.
             if (currD2 != null) {
                 Disc discAtPos = board[currD2.row()][currD2.col()];
                 return discAtPos != null && discAtPos.getOwner().equals(currentTurn);
@@ -240,11 +222,6 @@ public class GameLogic implements PlayableLogic {
         });
         removeDuplicates(flips);
         return flips;
-    }
-    // The isPosSame method is already defined as:
-
-    public boolean isPosSame(Position a, Position b) {
-        return a.row() == b.row() && a.col() == b.col();
     }
 
     public void removeDuplicates(Set<Position> positions) {
@@ -297,7 +274,8 @@ public class GameLogic implements PlayableLogic {
             y += dy;
         }
         return flips;
-    }    private void triggerBomb(Position bomb, Set<Position> flips, Set<Position> processedBombs) {
+    }
+    private void triggerBomb(Position bomb, Set<Position> flips, Set<Position> processedBombs) {
         // Debug prints to track the current state of the sets
 
 
@@ -349,8 +327,6 @@ public class GameLogic implements PlayableLogic {
             }
         }
     }
-
-
     private void flipDisc(Position a) {
         Disc d1 = board[a.row()][a.col()];
         if (d1.getOwner().equals(p1)) {
@@ -359,7 +335,6 @@ public class GameLogic implements PlayableLogic {
             d1.setOwner(p1);
         }
     }
-
     private boolean isOwnDisc(Disc disc) {
         return disc.getOwner().equals(currentTurn);
     }
@@ -419,7 +394,7 @@ public class GameLogic implements PlayableLogic {
             System.out.println("Undoing last move:");
             Move lastMove = moveHistory.pop();
             Position p4 = lastMove.position();
-            currentTurn = currentTurn.equals(p1) ? p2 : p1;
+            currentTurn = isFirstPlayerTurn() ? p2 : p1;
             if (lastMove.disc() instanceof BombDisc) currentTurn.number_of_bombs++;
             if (lastMove.disc() instanceof UnflippableDisc) currentTurn.number_of_unflippedable++;
             String type = board[p4.row()][p4.col()].getType();

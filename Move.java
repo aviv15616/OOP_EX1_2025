@@ -1,4 +1,3 @@
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,21 +19,16 @@ public class Move {
         this.flippedDiscs=a;
     }
 
-
-
-    public Position getPosition() {
-        return position;
+    public Position position() {
+        return this.position;
     }
     public List <Position> getFlippedDiscs(){
         return flippedDiscs;
     }
 
-    public void setPosition(Position position) {
-        this.position = position;
-    }
-
-    public Disc getDisc() {
+    public Disc disc() {
         return disc;
     }
+
 
 }

@@ -16,7 +16,7 @@ public class GameLogic implements PlayableLogic {
 
         reset();
     }
-    public GameLogic cloneGame() {
+    public GameLogic cloneGame(boolean isPlayerOne) {
         GameLogic clonedGame = new GameLogic();
 
         // Clone the board (assuming board elements are not null)
@@ -26,8 +26,13 @@ public class GameLogic implements PlayableLogic {
         }
 
         // Clone the players
-        clonedGame.p1 = new MiniMaxAI(true); // Assuming Player has a constructor for copy
-        clonedGame.p2 = new RandomAI(false);
+        clonedGame.p1 =new HumanPlayer(isPlayerOne);
+        clonedGame.p2 =new HumanPlayer(!isPlayerOne);
+        clonedGame.p1.number_of_bombs=p1.number_of_bombs;
+        clonedGame.p2.number_of_unflippedable=p1.number_of_unflippedable;
+
+
+
 
         // Set the current turn based on the original game's state
         clonedGame.currentTurn = (this.isFirstPlayerTurn()) ? clonedGame.p1 : clonedGame.p2;
@@ -72,6 +77,11 @@ public class GameLogic implements PlayableLogic {
         System.out.println();
         return true;
     }
+    public Disc [][] getBoard(){
+        return this.board;
+    }
+
+
 
     private void printFlippedPlayer(List<Position> flipped) {
 
@@ -88,8 +98,11 @@ public class GameLogic implements PlayableLogic {
     private void printFlippedUndo(List<Position> flipped) {
 
         for (Position pos : flipped) {
-            String type = board[pos.row()][pos.col()].getType();
-            System.out.println("\tUndo: flipping back " + type + " in (" + pos.row() + "," + pos.col() + ")");
+            Disc disc = board[pos.row()][pos.col()];
+            if (disc != null) {
+                String type = disc.getType();
+                System.out.println("\tUndo: flipping back " + type + " in (" + pos.row() + "," + pos.col() + ")");
+            }
         }
     }
 
@@ -174,7 +187,7 @@ public class GameLogic implements PlayableLogic {
         return boardSize;
     }
 
-    private boolean isValidPosition(int row, int col) {
+    public boolean isValidPosition(int row, int col) {
         return row >= 0 && row < boardSize && col >= 0 && col < boardSize;
     }
 
@@ -329,10 +342,12 @@ public class GameLogic implements PlayableLogic {
     }
     private void flipDisc(Position a) {
         Disc d1 = board[a.row()][a.col()];
-        if (d1.getOwner().equals(p1)) {
-            d1.setOwner(p2);
-        } else {
-            d1.setOwner(p1);
+        if (d1 != null) {
+            if (d1.getOwner().equals(p1)) {
+                d1.setOwner(p2);
+            } else {
+                d1.setOwner(p1);
+            }
         }
     }
     private boolean isOwnDisc(Disc disc) {

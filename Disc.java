@@ -27,11 +27,12 @@ public abstract class Disc {
     public void setOwner(Player player) {
         this.owner = player;
     }
+
     /**
      * Get the type of the disc.
      * use the:
-     *          "⬤",         "⭕"                "💣"
-     *      Simple Disc | Unflippedable Disc | Bomb Disc |
+     * "⬤",         "⭕"                "💣"
+     * Simple Disc | Unflippedable Disc | Bomb Disc |
      * respectively.
      */
     public abstract String getType();
@@ -45,4 +46,5 @@ public abstract class Disc {
     public String toString() {
         return getType() + " owned by " + (owner != null ? owner : "none");
     }
+
 }

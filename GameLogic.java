@@ -1,5 +1,10 @@
 import java.util.*;
 
+/**
+ * This class represents the logic of the game, implementing the PlayableLogic interface.
+ * It manages the game state, such as the game board, turns, move history, and determines if a move is valid.
+ * It also provides methods to update the game state,clone it for AI purposes, print information, and reset the game.
+ */
 public class GameLogic implements PlayableLogic {
     private Disc[][] board;
     private final int boardSize = 8;
@@ -8,6 +13,9 @@ public class GameLogic implements PlayableLogic {
     private boolean gameFinished = false; // Track if the game is finished
     private Stack<Move> moveHistory; // For undo functionality
 
+    /**
+     * Constructs a new GameLogic object, initializes the board, a moveHistory stack sets up players, and resets the game state.
+     */
     public GameLogic() {
         board = new Disc[boardSize][boardSize];
         moveHistory = new Stack<>();
@@ -16,6 +24,13 @@ public class GameLogic implements PlayableLogic {
 
         reset();
     }
+
+    /**
+     * Creates a deep copy of the current game state, including the board, players, move history, and game progress.
+     *
+     * @param isPlayerOne Indicates if the player is the first player for the cloned game.
+     * @return A new GameLogic instance with the cloned game state.
+     */
     public GameLogic cloneGame(boolean isPlayerOne) {
         GameLogic clonedGame = new GameLogic();
 
@@ -26,13 +41,10 @@ public class GameLogic implements PlayableLogic {
         }
 
         // Clone the players
-        clonedGame.p1 =new HumanPlayer(isPlayerOne);
-        clonedGame.p2 =new HumanPlayer(!isPlayerOne);
-        clonedGame.p1.number_of_bombs=p1.number_of_bombs;
-        clonedGame.p2.number_of_unflippedable=p1.number_of_unflippedable;
-
-
-
+        clonedGame.p1 = new HumanPlayer(isPlayerOne);
+        clonedGame.p2 = new HumanPlayer(!isPlayerOne);
+        clonedGame.p1.number_of_bombs = p1.number_of_bombs;
+        clonedGame.p2.number_of_unflippedable = p1.number_of_unflippedable;
 
         // Set the current turn based on the original game's state
         clonedGame.currentTurn = (this.isFirstPlayerTurn()) ? clonedGame.p1 : clonedGame.p2;
@@ -47,11 +59,23 @@ public class GameLogic implements PlayableLogic {
         return clonedGame;
     }
 
+    /**
+     * Checks if the board is valid for gameplay.
+     *
+     * @return true if the board is valid, false otherwise.
+     */
     public boolean isValidBoard() {
         if (board == null || boardSize == 0) return false;
         return true;
     }
 
+    /**
+     * Places a disc on the board and handles flipping discs, updating move history, and switching turns.
+     *
+     * @param a    The position where the disc will be placed.
+     * @param disc The disc to be placed.
+     * @return true if the move is valid and executed, false otherwise.
+     */
     @Override
     public boolean locate_disc(Position a, Disc disc) {
         int row = a.row();
@@ -77,14 +101,22 @@ public class GameLogic implements PlayableLogic {
         System.out.println();
         return true;
     }
-    public Disc [][] getBoard(){
+
+    /**
+     * Returns the current game board.
+     *
+     * @return A 2D array representing the game board.
+     */
+    public Disc[][] getBoard() {
         return this.board;
     }
 
-
-
+    /**
+     * Prints the discs flipped by the current player.
+     *
+     * @param flipped A list of positions representing flipped discs.
+     */
     private void printFlippedPlayer(List<Position> flipped) {
-
         for (Position pos : flipped) {
             String type = board[pos.row()][pos.col()].getType();
             System.out.println(
@@ -95,8 +127,12 @@ public class GameLogic implements PlayableLogic {
         }
     }
 
+    /**
+     * Prints the discs flipped when undoing a move.
+     *
+     * @param flipped A list of positions representing flipped discs.
+     */
     private void printFlippedUndo(List<Position> flipped) {
-
         for (Position pos : flipped) {
             Disc disc = board[pos.row()][pos.col()];
             if (disc != null) {
@@ -106,6 +142,12 @@ public class GameLogic implements PlayableLogic {
         }
     }
 
+    /**
+     * Prints the placement of a disc.
+     *
+     * @param type The type of disc being placed.
+     * @param a    The position where the disc is placed.
+     */
     private void printDiscLocate(String type, Position a) {
         System.out.println(
                 currentTurn == p1 ?
@@ -114,6 +156,9 @@ public class GameLogic implements PlayableLogic {
         );
     }
 
+    /**
+     * Updates the game state by checking for valid moves and determining the winner.
+     */
     public void updateGame() {
         if (ValidMoves().isEmpty()) {
             this.gameFinished = true;
@@ -129,51 +174,77 @@ public class GameLogic implements PlayableLogic {
                 System.out.println("It's a tie! Both players have " + player1Score + " discs.");
             }
         }
-
-
     }
 
+    /**
+     * Prints the winner of the game.
+     *
+     * @param winner   The player who won the game.
+     * @param winScore The score of the winning player.
+     * @param loser    The player who lost the game.
+     * @param loseScore The score of the losing player.
+     */
     public void printWinner(Player winner, int winScore, Player loser, int loseScore) {
         System.out.println("Player " + (winner.isPlayerOne() ? "1" : "2") +
                 " wins with " + winScore + " discs! Player " +
                 (loser.isPlayerOne() ? "1" : "2") + " had " + loseScore + " discs.");
     }
 
+    /**
+     * Counts the number of discs owned by a given player on the board.
+     *
+     * @param p1 The player whose discs are to be counted.
+     * @return The number of discs owned by the player.
+     */
     public int countPlayerDiscs(Player p1) {
         int score = 0;
         for (Disc[] d1 : board) {
             for (Disc d2 : d1) {
-                if (d2 != null) {
-
-                    if (p1.equals(d2.getOwner())) score++;
-
+                if (d2 != null && p1.equals(d2.getOwner())) {
+                    score++;
                 }
             }
         }
         return score;
     }
 
-
+    /**
+     * Flips the discs according to the specified move.
+     *
+     * @param m1 The move containing the discs to flip.
+     */
     public void flipDiscs(Move m1) {
         List<Position> toBeFlip = m1.getFlippedDiscs();
 
         for (Position pos : toBeFlip) {
-
-
             flipDisc(pos);
-
-
         }
     }
 
+    /**
+     * Checks if the current player has no bombs left.
+     *
+     * @return true if the current player has no bombs, false otherwise.
+     */
     public boolean isBomb0() {
         return currentTurn.number_of_bombs == 0;
     }
 
+    /**
+     * Checks if the current player has no unflippable discs left.
+     *
+     * @return true if the current player has no unflippable discs, false otherwise.
+     */
     public boolean isUnflip0() {
         return currentTurn.number_of_unflippedable == 0;
     }
 
+    /**
+     * Returns the disc at a given position.
+     *
+     * @param position The position to check.
+     * @return The disc at the specified position, or null if there is no disc.
+     */
     @Override
     public Disc getDiscAtPosition(Position position) {
         int row = position.row();
@@ -182,36 +253,71 @@ public class GameLogic implements PlayableLogic {
         return board[row][col];
     }
 
+    /**
+     * Returns the size of the game board.
+     *
+     * @return The size of the board.
+     */
     @Override
     public int getBoardSize() {
         return boardSize;
     }
 
+    /**
+     * Checks if a position is valid on the board.
+     *
+     * @param row The row index.
+     * @param col The column index.
+     * @return true if the position is within bounds, false otherwise.
+     */
     public boolean isValidPosition(int row, int col) {
         return row >= 0 && row < boardSize && col >= 0 && col < boardSize;
     }
 
+    /**
+     * Checks if a move is valid for the given position.
+     *
+     * @param a The position to check.
+     * @return true if the move is valid, false otherwise.
+     */
     public boolean isValidMove(Position a) {
         return isValidPosition(a.row(), a.col()) && board[a.row()][a.col()] == null && countFlips(a) > 0;
     }
 
+    /**
+     * Returns a list of all valid moves for the current player.
+     *
+     * @return A list of valid positions where the current player can place a disc.
+     */
     @Override
     public List<Position> ValidMoves() {
-        List<Position> Valid = new ArrayList<>();
+        List<Position> valid = new ArrayList<>();
         for (int i = 0; i < boardSize; i++) {
             for (int j = 0; j < boardSize; j++) {
                 Position p1 = new Position(i, j);
-                if (isValidMove(p1)) Valid.add(p1);
+                if (isValidMove(p1)) valid.add(p1);
             }
         }
-        return Valid;
+        return valid;
     }
 
+    /**
+     * Counts how many discs would be flipped if a disc is placed at the given position.
+     *
+     * @param a The position to check.
+     * @return The number of discs that would be flipped.
+     */
     @Override
     public int countFlips(Position a) {
         return getFlips(a).size();
     }
 
+    /**
+     * Retrieves the list of discs that would be flipped by placing a disc at the given position.
+     *
+     * @param position The position to check.
+     * @return A set of positions where discs would be flipped.
+     */
     public Set<Position> getFlips(Position position) {
         // Create a set to store the positions that should be flipped
         Set<Position> flips = new HashSet<>();
@@ -225,7 +331,6 @@ public class GameLogic implements PlayableLogic {
             }
         }
 
-
         flips.removeIf(currD2 -> { //Extra check to make sure the current player isn't flipping his discs back.
             if (currD2 != null) {
                 Disc discAtPos = board[currD2.row()][currD2.col()];
@@ -237,12 +342,25 @@ public class GameLogic implements PlayableLogic {
         return flips;
     }
 
+    /**
+     * Removes duplicate positions from the set of flips.
+     *
+     * @param positions The set of positions to remove duplicates from.
+     */
     public void removeDuplicates(Set<Position> positions) {
         Set<Position> uniquePositions = new HashSet<>(positions);
         positions.clear();  // Clear the original list
         positions.addAll(uniquePositions);  // Add the unique positions back
     }
 
+    /**
+     * Retrieves the list of discs that would be flipped in a particular direction from a given position.
+     *
+     * @param start The starting position.
+     * @param dx    The change in row (direction).
+     * @param dy    The change in column (direction).
+     * @return A set of positions that would be flipped in the given direction.
+     */
     public Set<Position> getFlipsInDir(Position start, int dx, int dy) {
         Set<Position> processedBombs = new HashSet<>();
         Set<Position> flips = new HashSet<>();
@@ -263,8 +381,6 @@ public class GameLogic implements PlayableLogic {
             if (!isOwnDisc(currD) && !(currD instanceof UnflippableDisc)) {
                 // Add opponent's discs to potential flips
                 potentialFlips.add(currP);
-
-
             } else if (isOwnDisc(currD)) {
                 // When we encounter our own disc
                 if (!potentialFlips.isEmpty()) {
@@ -279,7 +395,6 @@ public class GameLogic implements PlayableLogic {
                             triggerBomb(pos, flips, processedBombs);
                         }
                     }
-
                 }
                 break;
             }
@@ -288,20 +403,23 @@ public class GameLogic implements PlayableLogic {
         }
         return flips;
     }
+
+    /**
+     * Triggers a potential bomb at the given position and processes any potential resulting flips.
+     *
+     * @param bomb          The position of the bomb.
+     * @param flips         The set of flips that need to be processed.
+     * @param processedBombs A set of processed bombs to avoid infinite recursion.
+     */
     private void triggerBomb(Position bomb, Set<Position> flips, Set<Position> processedBombs) {
-        // Debug prints to track the current state of the sets
-
-
         // If this bomb has already been processed or flipped, return immediately
         if (processedBombs.contains(bomb) || flips.contains(bomb)) {
             return; // Stop recursion if this bomb has already been triggered
         }
 
         // Add bomb to the flips set and processed bombs set
-
         processedBombs.add(bomb);  // Mark as processed
         flips.add(bomb);
-
 
         // For each neighboring position of the bomb, check if it should trigger another bomb or flip discs.
         for (int dx = -1; dx <= 1; dx++) {
@@ -316,12 +434,8 @@ public class GameLogic implements PlayableLogic {
                     Disc adjDisc = board[x][y];
 
                     if (adjDisc != null && !(adjDisc instanceof UnflippableDisc)) {
-                        // Debug print to track the adjacent position and its disc type
-
-
                         // Case 1: If adjDisc is NOT your disc AND it is a BombDisc
                         if (!isOwnDisc(adjDisc) && adjDisc instanceof BombDisc && !processedBombs.contains(adj)) {
-
                             triggerBomb(adj, flips, processedBombs);  // Recursively trigger the adjacent bomb
                         }
                         // Case 2: If adjDisc IS your disc AND it is a BombDisc
@@ -336,10 +450,15 @@ public class GameLogic implements PlayableLogic {
                         }
                     }
                 }
-
             }
         }
     }
+
+    /**
+     * Flips a disc at the given position.
+     *
+     * @param a The position of the disc to be flipped.
+     */
     private void flipDisc(Position a) {
         Disc d1 = board[a.row()][a.col()];
         if (d1 != null) {
@@ -350,20 +469,43 @@ public class GameLogic implements PlayableLogic {
             }
         }
     }
+
+    /**
+     * Checks if the given disc is owned by the current player.
+     *
+     * @param disc The disc to check.
+     * @return true if the disc is owned by the current player, false otherwise.
+     */
     private boolean isOwnDisc(Disc disc) {
         return disc.getOwner().equals(currentTurn);
     }
 
+    /**
+     * Returns the first player of the game.
+     *
+     * @return The first player.
+     */
     @Override
     public Player getFirstPlayer() {
         return p1;
     }
 
+    /**
+     * Returns the second player of the game.
+     *
+     * @return The second player.
+     */
     @Override
     public Player getSecondPlayer() {
         return p2;
     }
 
+    /**
+     * Sets the players for the game.
+     *
+     * @param player1 The first player.
+     * @param player2 The second player.
+     */
     @Override
     public void setPlayers(Player player1, Player player2) {
         this.p1 = player1;
@@ -371,16 +513,29 @@ public class GameLogic implements PlayableLogic {
         this.currentTurn = player1;
     }
 
+    /**
+     * Checks if it's the first player's turn.
+     *
+     * @return true if it's the first player's turn, false otherwise.
+     */
     @Override
     public boolean isFirstPlayerTurn() {
         return currentTurn.equals(p1);
     }
 
+    /**
+     * Checks if the game is finished.
+     *
+     * @return true if the game is finished, false otherwise.
+     */
     @Override
     public boolean isGameFinished() {
         return gameFinished;
     }
 
+    /**
+     * Resets the game, clearing the board and resetting the player states.
+     */
     @Override
     public void reset() {
         board = new Disc[boardSize][boardSize];
@@ -399,6 +554,9 @@ public class GameLogic implements PlayableLogic {
         currentTurn = p1;
     }
 
+    /**
+     * Undoes the last move made by the current player.
+     */
     @Override
     public void undoLastMove() {
         // Undo the last move using moveHistory
@@ -406,20 +564,43 @@ public class GameLogic implements PlayableLogic {
             System.out.println("\tNo previous move available to undo.");
 
         } else {
+            // Log the action of undoing the last move
             System.out.println("Undoing last move:");
+
+            // Retrieve the last move from the move history stack
             Move lastMove = moveHistory.pop();
+
+            // Get the position of the last move
             Position p4 = lastMove.position();
+
+            // Update the current turn to the player who made the move
             currentTurn = isFirstPlayerTurn() ? p2 : p1;
-            if (lastMove.disc() instanceof BombDisc) currentTurn.number_of_bombs++;
-            if (lastMove.disc() instanceof UnflippableDisc) currentTurn.number_of_unflippedable++;
+
+            // If the last move involved a BombDisc, increment the player's bomb count
+            if (lastMove.disc() instanceof BombDisc)
+                currentTurn.number_of_bombs++;
+
+            // If the last move involved an UnflippableDisc, increment the player's unflippable count
+            if (lastMove.disc() instanceof UnflippableDisc)
+                currentTurn.number_of_unflippedable++;
+
+            // Retrieve the type of the disc at the last move's position
             String type = board[p4.row()][p4.col()].getType();
+
+            // Remove the disc from the board
             board[p4.row()][p4.col()] = null;
+
+            // Log the removal of the disc and its position
             System.out.println("\tUndo: removing " + type + " from (" + p4.row() + "," + p4.col() + ")");
+
+            // Restore the flipped discs to their original state
             flipDiscs(lastMove);
+
+            // Log the flipped discs that were restored during the undo process
             printFlippedUndo(lastMove.getFlippedDiscs());
+
+            // Add a blank line for better log formatting
             System.out.println();
         }
-
-
     }
 }
